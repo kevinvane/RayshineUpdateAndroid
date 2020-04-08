@@ -214,7 +214,8 @@ public class RayshineUpdate {
             //channel只能由NotificationManager来创建 （NotificationManagerCompat只能发通知，不能创建channel）
             NotificationManager manager =  (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             // 创建
-            NotificationChannel channel = new NotificationChannel(channelId, "download", NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel channel = new NotificationChannel(channelId, "download",
+                    NotificationManager.IMPORTANCE_DEFAULT);
             channel.enableLights(false);
             channel.enableVibration(false);
             channel.setShowBadge(false);
