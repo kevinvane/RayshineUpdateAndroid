@@ -18,10 +18,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> {
-
-            RayshineUpdate.check(this,"test");
-
-        });
+        fab.setOnClickListener(view -> RayshineUpdate.check(this,"test",false));
     }
 }

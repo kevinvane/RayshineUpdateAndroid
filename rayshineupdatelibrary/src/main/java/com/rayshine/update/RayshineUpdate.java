@@ -1,11 +1,13 @@
 package com.rayshine.update;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -18,17 +20,20 @@ import com.liulishuo.okdownload.core.cause.EndCause;
 import com.liulishuo.okdownload.core.cause.ResumeFailedCause;
 import com.liulishuo.okdownload.core.listener.DownloadListener1;
 import com.liulishuo.okdownload.core.listener.assist.Listener1Assist;
-import com.lxj.xpopup.XPopup;
-import com.rayshine.update.api.RayshineClient;
-import com.rayshine.update.api.VersionResponse;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.Permission;
 
-import java.io.File;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.io.File;
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 /**
@@ -40,51 +45,136 @@ public class RayshineUpdate {
 
     private static final String TAG = "RayshineUpdate";
     private static final String UPDATE_FILE_NAME = "rayshineUpdate.apk";
-    private static final String BASE_DOWNLOAD_URL = "http://app.rayshine.cc/apk/download/";
+    private static final String SERVICE_HOST = "http://app.rayshine.cc";
+    private static final String BASE_DOWNLOAD_URL = SERVICE_HOST + "/apk/download/";
+
+
+    private static OkHttpClient okHttpClient = new OkHttpClient();
 
     private interface TaskListener {
         void progress(int max, int progress);
         void end(String filePath);
     }
 
+    private static void getRequest(String url, Callback callback){
 
-    public static void check(Context context,String appName){
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        okHttpClient.newCall(request).enqueue(callback);
+    }
+    public static void check(Context context,String appName) {
+        check(context,appName,true);
+    }
+    public static void check(Context context,String appName,boolean silent){
 
-        retrofit2.Call<VersionResponse> call = RayshineClient.getRayshineService().getVersion(appName);
-        call.enqueue(new Callback<VersionResponse>() {
+        String url = SERVICE_HOST + "/apk/release/" + appName;
+        getRequest(url, new Callback() {
+
             @Override
-            public void onResponse(Call<VersionResponse> call, Response<VersionResponse> response) {
+            public void onResponse(Call call, Response response) throws IOException {
 
-                VersionResponse body = response.body();
-                if(body!=null && body.getStatusCode() == 200){
-                    int versionCodeServer = body.getData().getVersionCode();
-                    int versionCurrent = InstallApk.getAppCurrentVersionCode(context);
-                    if(versionCodeServer > versionCurrent){
-                        showDialog(context,appName,body.getData());
-                    }else{
-                        Toast.makeText(context,"您已是最新版本",Toast.LENGTH_LONG).show();
+                int code = response.code();
+                if(code == 200 && response.body()!=null){
+                    String responseString = response.body().string();
+                    Log.d(TAG,"响应：" + responseString);
+                    // {"statusCode":200,"data":{"id":3,"versionName":"2.1.5","versionCode":27,"type":"apk","date":"2018-07-03T21:44:51.000+0000","size":4286900.0}}
+                    try {
+                        JSONObject jo = new JSONObject(responseString);
+                        int statusCode = jo.getInt("statusCode");
+                        if(statusCode == 200){
+
+                            JSONObject data = jo.getJSONObject("data");
+                            int versionCodeServer = data.getInt("versionCode");
+                            String versionNameServer = data.getString("versionName");
+
+                            int versionCurrent = InstallApk.getAppCurrentVersionCode(context);
+                            if(versionCodeServer > versionCurrent){
+                                showDialogLooper(context,appName,versionNameServer);
+                                return;
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
+                if(!silent)showToastNotUpdate(context);
             }
 
             @Override
-            public void onFailure(Call<VersionResponse> call, Throwable t) {
-                t.printStackTrace();
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
             }
         });
+
     }
 
-    private static void showDialog(Context context,String appName, VersionResponse.DataBean dataBean){
+    private static void showToastNotUpdate(Context context) {
 
-        new XPopup.Builder(context)
-                .asConfirm("升级提示",
-                        "发现新版本" + dataBean.getVersionName() + ",是否立即升级?",
-                        "忽略",
-                        "升级",
-                        () -> downloadAuto(context,appName),
-                        () -> {},
-                        false
-                ).show();
+        showToastLooper(context,"您已是最新版本");
+    }
+
+    /**
+     * 在子线程显示show Toast
+     * @param context
+     * @param text
+     */
+    private static void showToastLooper(Context context,String text){
+
+        Looper.prepare();
+        Toast toast = Toast.makeText(context, null, Toast.LENGTH_LONG);
+        toast.setText(text);
+        toast.show();
+        Looper.loop();
+    }
+    // public static void check(Context context,String appName){
+    //
+    //     retrofit2.Call<VersionResponse> call = RayshineClient.getRayshineService().getVersion(appName);
+    //     call.enqueue(new Callback<VersionResponse>() {
+    //         @Override
+    //         public void onResponse(Call<VersionResponse> call, Response<VersionResponse> response) {
+    //
+    //             VersionResponse body = response.body();
+    //             if(body!=null && body.getStatusCode() == 200){
+    //                 int versionCodeServer = body.getData().getVersionCode();
+    //                 int versionCurrent = InstallApk.getAppCurrentVersionCode(context);
+    //                 if(versionCodeServer > versionCurrent){
+    //                     showDialog(context,appName,body.getData());
+    //                 }else{
+    //                     Toast.makeText(context,"您已是最新版本",Toast.LENGTH_LONG).show();
+    //                 }
+    //             }
+    //         }
+    //
+    //         @Override
+    //         public void onFailure(Call<VersionResponse> call, Throwable t) {
+    //             t.printStackTrace();
+    //         }
+    //     });
+    // }
+
+    private static void showDialogLooper(Context context,String appName, String versionName){
+
+        Looper.prepare();
+        AlertDialog alertDialog = new AlertDialog.Builder(context)
+                .setTitle("升级提示")
+                .setMessage("发现新版本" + versionName + ",是否立即升级?")
+                .setNegativeButton("暂不更新", (dialog, which) -> Log.d(TAG, "暂不更新"))
+                .setPositiveButton("更新", (dialog, which) -> downloadAuto(context, appName))
+                .create();
+
+        alertDialog.show();
+        Looper.loop();
+
+        // new XPopup.Builder(context)
+        //         .asConfirm("升级提示",
+        //                 "发现新版本" + dataBean.getVersionName() + ",是否立即升级?",
+        //                 "忽略",
+        //                 "升级",
+        //                 () -> downloadAuto(context,appName),
+        //                 () -> {},
+        //                 false
+        //         ).show();
 
     }
 
