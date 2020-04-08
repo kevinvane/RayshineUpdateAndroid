@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
 
-            RayshineUpdate.check(this,"bee");
+            RayshineUpdate.check(this,"test");
 
         });
     }
