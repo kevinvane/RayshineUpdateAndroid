@@ -181,7 +181,7 @@ public class RayshineUpdate {
 
     private static void downloadAuto(Context context,String appName){
 
-        downloadPermission(context, BASE_DOWNLOAD_URL + appName, new TaskListener() {
+        download(context, BASE_DOWNLOAD_URL + appName, new TaskListener() {
 
             @Override
             public void progress(int max, int progress) {
@@ -231,6 +231,12 @@ public class RayshineUpdate {
         notificationManager.notify(1000, mBuilder.build());
     }
 
+    /**
+     * 先请求存储权限，拿到权限再下载，如果文件存储与公共目录，必须要先申请权限
+     * @param context
+     * @param url
+     * @param listener
+     */
     private static void downloadPermission(Context context,final String url,TaskListener listener){
 
         AndPermission.with(context)
@@ -251,6 +257,7 @@ public class RayshineUpdate {
 
     private static void download(Context context, String url, TaskListener listener){
 
+        // 不要将文件存储在公共目录上，就不需要申请权限
         final String filePath = getUpdateFilePath(context);
 
         DownloadTask task = new DownloadTask.Builder(url, getUpdateDir(context))
@@ -318,7 +325,7 @@ public class RayshineUpdate {
     }
 
     /**
-     * 外部存储上的路径(/storage/emulated/0/Android/data/)，
+     * 外部存储上的路径(/storage/emulated/0/Android/data/Download)，
      * 当用户卸载应用时，系统会清除这些文件
      *
      * @param context

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <external-path path="." name="external_files" />
-    <external-path path="Download/" name="beta_external_path" />
-    <external-path path="Android/data/" name="beta_external_files_path" />
-    <external-path path="Android/data/rayshine/" name="files_root" />
-    <files-path path="files_root" name="Android/data/rayshine/"/>
+    <!--ProviderFile定义，共享文件给外部，用于安装更新的APK文件-->
+    <!--物理路径相当于Context.getExternalFilesDir(String type) + /path/-->
+    <!--/storage/emulated/0/Android/data/应用包名/files/Download-->
+    <external-files-path name="update_apk_download_path" path="/Download/" />
 </paths>
