@@ -316,12 +316,12 @@ public class RayshineUpdate {
      */
     private static String getUpdateFilePath(Context context){
 
-        return getDownloadFileDir(context).getPath() + "/" + UPDATE_FILE_NAME;
+        return getExternalCacheDir(context).getPath() + "/" + UPDATE_FILE_NAME;
     }
 
     private static File getUpdateDir(Context context){
 
-        return getDownloadFileDir(context);
+        return getExternalCacheDir(context);
     }
 
     /**

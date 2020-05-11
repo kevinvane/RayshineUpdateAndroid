@@ -5,4 +5,5 @@
     <!--物理路径相当于Context.getExternalFilesDir(String type) + /path/-->
     <!--/storage/emulated/0/Android/data/应用包名/files/Download-->
     <external-files-path name="update_apk_download_path" path="/Download/" />
+    <external-cache-path name="update_apk_download_path-cache" path="/Download/" />
 </paths>
