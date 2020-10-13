@@ -2,7 +2,10 @@
 
 这是一个测试项目，比较粗糙。
 
-
+###一行代码检查更新
+```
+RayshineUpdate.check(this,"test")
+```
 
 ###导入
 
