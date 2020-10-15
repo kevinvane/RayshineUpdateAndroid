@@ -206,7 +206,7 @@ public class RayshineUpdate {
         boolean isFinish = (max == progress);
 
         mBuilder.setContentTitle(isFinish?"下载完成" : "正在下载更新包")
-                .setSmallIcon(R.drawable.ic_launcher_round)
+                .setSmallIcon(R.drawable.notification_icon)
                 .setProgress(max,progress,false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

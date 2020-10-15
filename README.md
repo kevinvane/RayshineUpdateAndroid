@@ -7,6 +7,13 @@
 RayshineUpdate.check(this,"test")
 ```
 
+### 下载通知栏Icon覆盖
+
+在您项目中的drawable目录创建相同名称的png图片即可覆盖，Icon图片最好是有镂空效果，即只有 “单色+透明” 两部部分。
+```
+drawable/notification_icon.png
+```
+
 ###导入
 
 ```gradle
