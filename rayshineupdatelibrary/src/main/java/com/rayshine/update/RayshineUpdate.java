@@ -68,7 +68,7 @@ public class RayshineUpdate {
     }
     public static void check(Context context,String appName,boolean silent){
 
-        String url = SERVICE_HOST + "/apk/release/" + appName;
+        String url = SERVICE_HOST + "/app/update/" + appName;
         getRequest(url, new Callback() {
 
             @Override
