@@ -32,8 +32,8 @@ repositories {
 
 1. androidx新版本
 ```
-versionCode 20
-versionName "2.0"
+versionCode 22
+versionName "2.2"
 ```
 
 2. 旧的兼容版本
