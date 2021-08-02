@@ -46,7 +46,7 @@ public class RayshineUpdate {
     private static final String TAG = "RayshineUpdate";
     private static final String UPDATE_FILE_NAME = "rayshineUpdate.apk";
     private static final String SERVICE_HOST = "http://app.rayshine.cc";
-    private static final String BASE_DOWNLOAD_URL = SERVICE_HOST + "/apk/download/";
+    // private static final String BASE_DOWNLOAD_URL = SERVICE_HOST + "/apk/download/";
 
 
     private static OkHttpClient okHttpClient = new OkHttpClient();
@@ -87,10 +87,11 @@ public class RayshineUpdate {
                             JSONObject data = jo.getJSONObject("data");
                             int versionCodeServer = data.getInt("versionCode");
                             String versionNameServer = data.getString("versionName");
+                            String urlDownload = data.getString("url");
 
                             int versionCurrent = InstallApk.getAppCurrentVersionCode(context);
                             if(versionCodeServer > versionCurrent){
-                                showDialogLooper(context,appName,versionNameServer);
+                                showDialogLooper(context,urlDownload,versionNameServer);
                                 return;
                             }
                         }
@@ -153,14 +154,14 @@ public class RayshineUpdate {
     //     });
     // }
 
-    private static void showDialogLooper(Context context,String appName, String versionName){
+    private static void showDialogLooper(Context context,String urlDownload, String versionName){
 
         Looper.prepare();
         AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setTitle("升级提示")
                 .setMessage("发现新版本" + versionName + ",是否立即升级?")
                 .setNegativeButton("暂不更新", (dialog, which) -> Log.d(TAG, "暂不更新"))
-                .setPositiveButton("更新", (dialog, which) -> downloadAuto(context, appName))
+                .setPositiveButton("更新", (dialog, which) -> downloadAuto(context, urlDownload))
                 .create();
 
         alertDialog.show();
@@ -179,9 +180,9 @@ public class RayshineUpdate {
     }
 
 
-    private static void downloadAuto(Context context,String appName){
+    private static void downloadAuto(Context context,String urlDownload){
 
-        download(context, BASE_DOWNLOAD_URL + appName, new TaskListener() {
+        download(context, urlDownload, new TaskListener() {
 
             @Override
             public void progress(int max, int progress) {
